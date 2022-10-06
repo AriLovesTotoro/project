@@ -103,8 +103,8 @@ class Enrollment(models.Model):
     # Other fields and methods you would like to design
 class Question(models.Model):
     # Foreign key to lesson
-    question = models.ForeignKey(Lesson, on_delete=models.CASCADE)
-    questions = models.ManyToManyField(Course)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    course = models.ManyToManyField(Course)
     # question text
     text = models.TextField()
     # question grade/mark
@@ -127,16 +127,15 @@ class Question(models.Model):
     # Indicate if this choice of the question is a correct one or not
     # Other fields and methods you would like to design
 class Choice(models.Model):
-    question=models.ForeignKey(Question, on_delete=models.CASCADE)
-    choices = models.Manager(Question)
-    check = models.BooleanField()
+    question_id=models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text=models.TextField()
+    is_correct = models.BooleanField()
 
 # <HINT> The submission model
 # One enrollment could have multiple submission
 # One submission could have multiple choices
 # One choice could belong to multiple submissions
 class Submission(models.Model):
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
-    submission = models.ForeignKey(Choice, on_delete=models.CASCADE)
-    chocies = models.ManyToManyField(Choice)
+    enrollment_id = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    chocie_id = models.ManyToManyField(Choice)
 #    Other fields and methods you would like to design
