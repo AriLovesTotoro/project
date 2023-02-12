@@ -103,10 +103,10 @@ class Enrollment(models.Model):
     # Other fields and methods you would like to design
 class Question(models.Model):
     # Foreign key to lesson
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
-    course = models.ManyToManyField(Course)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    
     # question text
-    text = models.TextField()
+    question_text = models.TextField()
     # question grade/mark
     grade = models.FloatField()
 
@@ -119,6 +119,8 @@ class Question(models.Model):
         else:
             return False
 
+    def __str__(self):
+        return self.question_text
 
 #  <HINT> Create a Choice Model with:
     # Used to persist choice content for a question
@@ -132,11 +134,17 @@ class Choice(models.Model):
     choice_text=models.TextField()
     is_correct = models.BooleanField()
 
+    def __str__(self):
+        return self.choice_text
+
 # <HINT> The submission model
 # One enrollment could have multiple submission
 # One submission could have multiple choices
 # One choice could belong to multiple submissions
 class Submission(models.Model):
     enrollment_id = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
-    chocie_id = models.ManyToManyField(Choice)
-#    Other fields and methods you would like to design
+    choices = models.ManyToManyField(Choice)
+# Other fields and methods you would like to design
+
+    def __str__(self):
+        return f"submission:{self.pk}"

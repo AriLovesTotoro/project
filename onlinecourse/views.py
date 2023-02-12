@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 # <HINT> Import any new Models here
-from .models import Course, Enrollment,Question,Choice,Sub mission
+from .models import Course, Enrollment,Question,Choice,Submission
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -115,10 +115,12 @@ def submit(request, course_id):
     user = request.user
     enroll = Enrollment.objects.get(user=user, course=course)
     sub = Submission.objects.create(enrollment=enroll)
+
     choices=extract_answers(request)
-    for choice in choices:
-        sub.choice_id(choice)
-    return HttpResponseRedirect(viewname='onlinecourse:submit', show_exam_result(request,course_id,sub.enrollment_id))
+
+    sub.choices.set(choices)
+    sub.save()
+    return HttpResponseRedirect(reverse(viewname='onlinecourse:show_exam_result', args=(course.id, sub.id,)))
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
 def extract_answers(request):
@@ -138,13 +140,28 @@ def extract_answers(request):
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
 def show_exam_result(request, course_id, submission_id):
+
     course = get_object_or_404(Course, pk=course_id)
-    sub = Submission.objects.get(submission_id)
+    sub = get_object_or_404(Submission,pk=submission_id)
+    selected_choices=sub.choices.all()
+
     correct_answers=0
-    for choice in sub.chocie_id:
-        if choice.is_correct:
-            correct_answers = correct_answers+1
-    render(request, 'onlinecourse/exam_result_bootsrap.html', correct_answers)
+    grade=0
+
+    for choice in course.questions.all():
+        correct_answers=correct_answers+1
+        if choice.is_get_score(selected_choices):
+            grade = choice.grade+1
+
+    context = {
+        'course': course,
+        'selected_choices': selected_choices,
+        'grade': grade,
+        'correct_answers': correct_answers,
+        'score': round((grade/ correct_answers) * 100)
+    }
+
+    render(request, 'onlinecourse/exam_result_bootsrap.html', context)
 
 
 
